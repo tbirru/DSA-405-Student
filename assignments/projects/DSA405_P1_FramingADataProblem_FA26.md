@@ -42,24 +42,48 @@ independents?" is a question: the table that would answer it can be described.
 The question usually changes once the data is in hand; P4 asks for a description of that
 shift. P1 grades whether a real question exists at all.
 
+Question: Is there a relationship between grocery store or restaurant density and income level across
+Raleigh zip codes?
+
 ### 2. Sources & access evidence
 
 **Two or more sources, at least one off the web.** For each one:
 
-| | |
-|---|---|
-| Publisher | who produces and hosts it |
-| URL | the actual page, not the site's front door |
-| Coverage & time span | what it includes, over what period |
-| Approximate size | rows, records, or pages, as a number |
-| Access method | download / `read_html` / scrape / API |
+Source #1: Census Bureau ACS, income by zip code
+| Publisher: U.S. Census Bureau
+| URL: https://www.census.gov/data/developers/data-sets/acs-5year/2023.html
+| Coverage & time span: 5-year rolling estimates, all U.S. zip code tabulation areas, most recent release |
+| Approximate size: ~30 zip codes across Wake County, one row each |
+| Access method: API |
 
 Then **paste in evidence that each source is reachable**: a row count from `read_csv`
 or `read_html` (the Week 2 Lab covers both), a status code, or a screenshot of the data
 on screen. A screenshot requires no code, so no source is exempt.
 
+Screenshot:
+<img width="781" height="901" alt="Screenshot 2026-09-03 at 11 00 22 PM" src="https://github.com/user-attachments/assets/fcc166a7-11c3-4874-baf0-e217c3e5714c" />
+
 Finish with one sentence naming the **likeliest failure point**: the least trusted
 source, and the fallback if it falls through.
+
+**Likeliest failure point:** the Wake County dataset's addresses are only about 85 percent geocoded, so the biggest risk is losing roughly 15 percent of restaurant records when converting addresses to zip codes; the fallback is re-geocoding the missing addresses with a free geocoding API if the join comes up short.
+
+Source #2: 
+| Publisher: Wake County Government (WakeGov Open Data)
+| URL: [https://www.census.gov/data/developers/data-sets/acs-5year/2023.html](https://data-wake.opendata.arcgis.com/datasets/Wake:restaurants-in-wake-c/about)
+| Coverage & time span: All active food service facilities Wake County inspects; updated daily
+| Approximate size: 4,102 records |
+| Access method: API (ArcGIS REST endpoint) |
+
+import requests
+url ="https://maps.wakegov.com/arcgis/rest/services/Inspections/RestaurantInspectionsOpenD
+ata/MapServer/0/query"
+params = {"where": "1=1", "returnCountOnly": "true", "f"
+: "json"}
+I = requests. get (url, params=params, timeout=30)
+print (r. status _code)
+print (r. json ())
+
 
 ### 3. Constraints & guardrails
 
@@ -82,6 +106,13 @@ If a site says no, that is the answer. A source ruled out with the terms quoted 
 P1 material, not a failure. When in doubt, ask the instructor before writing the
 request.
 
+Wake County restaurants source: license quoted directly as "CCO 1.0 Universal." CCO places the data in the public domain with no restriction on reuse.
+Census ACS source: Census Bureau data is a work of the U.S. government and is not subject to copyright protection in the United States, making it public domain and freely reusable. No attribution is legally required, though citing the Census Bureau is standard academic practice.
+Certification against course guardrails:
+• No source is behind a login or paywall.
+• Neither source contains personal or identifiable information about individuals; both are business/aggregate level data.
+• Both sources are reached through documented APls rather than scraping, so no robots.txt review applies.
+• Both APIs will be called at a reasonable rate with a clear, honest identification in the request, and results will be cached locally rather than re-queried repeatedly.
 ### 4. Tier declaration
 
 Declare a tier, with one sentence on why it fits the student and these sources.
@@ -94,6 +125,8 @@ Declare a tier, with one sentence on why it fits the student and these sources.
 
 Tiers may be raised any time up to P3 and may not be lowered after P3. Tier affects
 exactly one rubric row in the entire course: P4 Criterion 5, Technical Ambition. 
+
+Tier 1 — Solid. Two sources, one reached through a documented ArGIS REST API and one through the Census Bureau's documented API, combined with a one-to-many join (many restaurants per zip code) against income. This fits a project where both sources are clean and well documented, and the substantive work is in the join and the analysis rather than in the scraping itself.
 
 ---
 
